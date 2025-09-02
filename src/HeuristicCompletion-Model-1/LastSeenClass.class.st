@@ -66,6 +66,34 @@ LastSeenClass class >> pruneOlderThan: aDateAndTime [
 ]
 
 { #category : 'activation' }
+LastSeenClass class >> recordClass: aClass [
+    "Record the last-seen class as a timestamp. Change payload if needed."
+
+    | now duration className entry |
+    LastSeenClass ifNil: [ LastSeenClass := Dictionary new ].
+
+    now := DateAndTime now.
+    CurrentClass ifNotNil: [
+        duration := now - CurrentStartClass.
+        entry := LastSeenClass at: CurrentClass ifAbsent: [
+            Dictionary new
+                at: #duration put: Duration zero;
+                at: #credits put: 0;
+                at: #lastSeen put: CurrentStartClass;
+                yourself ].
+        entry at: #duration put: (entry at: #duration) + duration.
+        entry at: #credits put: (entry at: #credits) + duration asSeconds.
+        entry at: #lastSeen put: now.
+        LastSeenClass at: CurrentClass put: entry.
+    ].
+
+    className := aClass name asString.
+    CurrentClass := className.
+    CurrentStartClass := now.
+
+]
+
+{ #category : 'activation' }
 LastSeenClass class >> removeKey: aString [
     LastSeenClass ifNil: [ ^ self ].
     LastSeenClass removeKey: aString ifAbsent: [ ].
@@ -82,11 +110,12 @@ LastSeenClass class >> reset [
 
 { #category : 'testing' }
 LastSeenClass class >> shouldBeActivatedInContext: aBrowserContext [
-	"aBrowserContext knows the current selection in the browser."
-	aBrowserContext isClassSelected ifTrue: [
-			| cm |
-			cm := aBrowserContext lastSelectedClass].
-	^ (super shouldBeActivatedInContext: aBrowserContext) and: [ aBrowserContext isClassSelected ] 
+        "aBrowserContext knows the current selection in the browser."
+        aBrowserContext isClassSelected ifTrue: [
+                        | cm |
+                        cm := aBrowserContext lastSelectedClass.
+                        LastSeenClass recordClass: cm ].
+        ^ (super shouldBeActivatedInContext: aBrowserContext) and: [ aBrowserContext isClassSelected ]
 ]
 
 { #category : 'activation' }
