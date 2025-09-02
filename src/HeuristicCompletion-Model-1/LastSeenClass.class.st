@@ -80,17 +80,13 @@ LastSeenClass class >> reset [
     CurrentStartClass := nil.
 ]
 
-{ #category : 'class initialization' }
+{ #category : 'testing' }
 LastSeenClass class >> shouldBeActivatedInContext: aBrowserContext [
 	"aBrowserContext knows the current selection in the browser."
-	aBrowserContext isMethodSelected ifTrue: [
+	aBrowserContext isClassSelected ifTrue: [
 			| cm |
-			cm := aBrowserContext lastSelectedMethod.
-			cm := (cm respondsTo: #compiledMethod)
-				      ifTrue: [ cm compiledMethod ]
-				      ifFalse: [ cm ].
-			LastSeenMessage recordCompiledMethod: cm ].
-	^ (super shouldBeActivatedInContext: aBrowserContext) and: [ aBrowserContext isMethodSelected ]
+			cm := aBrowserContext lastSelectedClass].
+	^ (super shouldBeActivatedInContext: aBrowserContext) and: [ aBrowserContext isClassSelected ] 
 ]
 
 { #category : 'activation' }
