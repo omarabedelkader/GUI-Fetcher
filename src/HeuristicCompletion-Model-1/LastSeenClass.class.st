@@ -9,8 +9,9 @@ Class {
 		'CurrentStartClass',
 		'LastSeenClass'
 	],
-	#category : 'HeuristicCompletion-Model-1',
-	#package : 'HeuristicCompletion-Model-1'
+	#category : 'HeuristicCompletion-Model-1-Class',
+	#package : 'HeuristicCompletion-Model-1',
+	#tag : 'Class'
 }
 
 { #category : 'activation' }

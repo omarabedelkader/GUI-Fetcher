@@ -9,8 +9,9 @@ Class {
 		'CurrentStart',
 		'LastSeen'
 	],
-	#category : 'HeuristicCompletion-Model-1',
-	#package : 'HeuristicCompletion-Model-1'
+	#category : 'HeuristicCompletion-Model-1-Selector',
+	#package : 'HeuristicCompletion-Model-1',
+	#tag : 'Selector'
 }
 
 { #category : 'tracing' }
