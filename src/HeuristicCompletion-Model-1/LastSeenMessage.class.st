@@ -13,39 +13,39 @@ Class {
 	#package : 'HeuristicCompletion-Model-1'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> allLastSeen [
     "Return a copy of the dictionary so callers don’t mutate internals."
     LastSeen ifNil: [ ^ Dictionary new ].
     ^ LastSeen copy.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'class initialization' }
 LastSeenMessage class >> initialize [
     LastSeen := Dictionary new.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> keys [
     LastSeen ifNil: [ ^ #() ].
     ^ LastSeen keys asArray sorted.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> lastSeenAtKey: aString [
     "Return the stored payload (timestamp here) or nil."
     LastSeen ifNil: [ ^ nil ].
     ^ LastSeen at: aString ifAbsent: [ nil ].
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> packageActivation [ 
 
     <classAnnotation>
     ^ ClyTabActivationStrategyAnnotation for: Package asCalypsoItemContext
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> pruneOlderThan: aDateAndTime [
     "Optional: keep the dict tidy."
     LastSeen ifNil: [ ^ self ].
@@ -53,7 +53,7 @@ LastSeenMessage class >> pruneOlderThan: aDateAndTime [
         ((LastSeen at: k) < aDateAndTime) ifTrue: [ LastSeen removeKey: k ifAbsent: [] ] ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> recordCompiledMethod: aCompiledMethod [
 	"Record the last-seen method as a timestamp. Change payload if needed."
 
@@ -73,13 +73,13 @@ LastSeenMessage class >> recordCompiledMethod: aCompiledMethod [
     CurrentStart := now.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> removeKey: aString [
     LastSeen ifNil: [ ^ self ].
     LastSeen removeKey: aString ifAbsent: [ ].
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'tracing' }
 LastSeenMessage class >> reset [
 
 	<script>
@@ -88,23 +88,17 @@ LastSeenMessage class >> reset [
     CurrentStart := nil.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'testing' }
 LastSeenMessage class >> shouldBeActivatedInContext: aBrowserContext [
-    "aBrowserContext knows the current selection in the browser."
-    aBrowserContext isMethodSelected ifTrue: [
-        | cm |
-        cm := aBrowserContext lastSelectedMethod.
-        "Handle Calypso/Nautilus wrappers or a plain CompiledMethod"
-        cm := (cm respondsTo: #compiledMethod)
-            ifTrue: [ cm compiledMethod ]
-            ifFalse: [ cm ].
-
-        "Record instead of printing"
-        LastSeenMessage recordCompiledMethod: cm
-    ].
-
-    ^ (super shouldBeActivatedInContext: aBrowserContext)
-        and: [ aBrowserContext isMethodSelected ]
+	"aBrowserContext knows the current selection in the browser."
+	aBrowserContext isMethodSelected ifTrue: [
+			| cm |
+			cm := aBrowserContext lastSelectedMethod.
+			cm := (cm respondsTo: #compiledMethod)
+				      ifTrue: [ cm compiledMethod ]
+				      ifFalse: [ cm ].
+			LastSeenMessage recordCompiledMethod: cm ].
+	^ (super shouldBeActivatedInContext: aBrowserContext) and: [ aBrowserContext isMethodSelected ]
 ]
 
 { #category : 'building' }
