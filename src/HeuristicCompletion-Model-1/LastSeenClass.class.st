@@ -114,7 +114,7 @@ LastSeenClass class >> shouldBeActivatedInContext: aBrowserContext [
         aBrowserContext isClassSelected ifTrue: [
                         | cm |
                         cm := aBrowserContext lastSelectedClass.
-                        LastSeenClass recordClass: cm ].
+                        self recordClass: cm ].
         ^ (super shouldBeActivatedInContext: aBrowserContext) and: [ aBrowserContext isClassSelected ]
 ]
 
@@ -122,7 +122,7 @@ LastSeenClass class >> shouldBeActivatedInContext: aBrowserContext [
 LastSeenClass >> build [
 ]
 
-{ #category : 'accessing' }
+{ #category : 'introspection' }
 LastSeenClass >> className [
 
 	^ className
