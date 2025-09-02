@@ -5,6 +5,8 @@ Class {
 		'methodName'
 	],
 	#classVars : [
+		'CurrentSelector',
+		'CurrentStart',
 		'LastSeen'
 	],
 	#category : 'HeuristicCompletion-Model-1',
@@ -53,12 +55,22 @@ LastSeenMessage class >> pruneOlderThan: aDateAndTime [
 
 { #category : 'as yet unclassified' }
 LastSeenMessage class >> recordCompiledMethod: aCompiledMethod [
-    "Record the last-seen method as a timestamp. Change payload if needed."
-    | key |
-    LastSeen ifNil: [ LastSeen := Dictionary new ].
+	"Record the last-seen method as a timestamp. Change payload if needed."
 
-    key := aCompiledMethod methodClass name , '>>' , aCompiledMethod selector asString.
-    LastSeen at: key put: DateAndTime now.
+	| key now duration selector |
+	LastSeen ifNil: [ LastSeen := Dictionary new ].
+
+	    now := DateAndTime now.
+    CurrentSelector ifNotNil: [
+        duration := now - CurrentStart.
+        LastSeen at: CurrentSelector
+            ifPresent: [ :existing | LastSeen at: CurrentSelector put: existing + duration ]
+            ifAbsent: [ LastSeen at: CurrentSelector put: duration ].
+    ].
+
+    selector := aCompiledMethod selector asString.
+    CurrentSelector := selector.
+    CurrentStart := now.
 ]
 
 { #category : 'as yet unclassified' }
@@ -69,8 +81,11 @@ LastSeenMessage class >> removeKey: aString [
 
 { #category : 'as yet unclassified' }
 LastSeenMessage class >> reset [
-    <script>
-    LastSeen := Dictionary new.
+
+	<script>
+	LastSeen := Dictionary new.
+	    CurrentSelector := nil.
+    CurrentStart := nil.
 ]
 
 { #category : 'as yet unclassified' }
