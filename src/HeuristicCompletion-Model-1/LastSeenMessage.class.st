@@ -17,7 +17,16 @@ Class {
 LastSeenMessage class >> allLastSeen [
     "Return a copy of the dictionary so callers don’t mutate internals."
     LastSeen ifNil: [ ^ Dictionary new ].
-    ^ LastSeen copy.
+    ^ LastSeen collect: [ :each | each copy ].
+]
+
+{ #category : 'tracing' }
+LastSeenMessage class >> creditsAtKey: aString [
+    "Return accumulated credits or zero."
+    | entry |
+    LastSeen ifNil: [ ^ 0 ].
+    entry := LastSeen at: aString ifAbsent: [ ^ 0 ].
+    ^ entry at: #credits ifAbsent: [ 0 ].
 ]
 
 { #category : 'class initialization' }
@@ -33,9 +42,12 @@ LastSeenMessage class >> keys [
 
 { #category : 'tracing' }
 LastSeenMessage class >> lastSeenAtKey: aString [
-    "Return the stored payload (timestamp here) or nil."
-    LastSeen ifNil: [ ^ nil ].
-    ^ LastSeen at: aString ifAbsent: [ nil ].
+	"Return the stored payload (timestamp here) or nil."
+
+	| entry |
+	LastSeen ifNil: [ ^ nil ].
+	entry := LastSeen at: aString ifAbsent: [ ^ nil ].
+    ^ entry at: #duration ifAbsent: [ nil ].
 ]
 
 { #category : 'tracing' }
@@ -57,20 +69,29 @@ LastSeenMessage class >> pruneOlderThan: aDateAndTime [
 LastSeenMessage class >> recordCompiledMethod: aCompiledMethod [
 	"Record the last-seen method as a timestamp. Change payload if needed."
 
-	| key now duration selector |
+	| now duration selector entry |
 	LastSeen ifNil: [ LastSeen := Dictionary new ].
 
-	    now := DateAndTime now.
-    CurrentSelector ifNotNil: [
-        duration := now - CurrentStart.
-        LastSeen at: CurrentSelector
-            ifPresent: [ :existing | LastSeen at: CurrentSelector put: existing + duration ]
-            ifAbsent: [ LastSeen at: CurrentSelector put: duration ].
-    ].
+	now := DateAndTime now.
+	CurrentSelector ifNotNil: [
+			duration := now - CurrentStart.
+			        entry := LastSeen at: CurrentSelector ifAbsent: [
+            Dictionary new
+                at: #duration put: Duration zero;
+                at: #credits put: 0;
+                at: #lastSeen put: CurrentStart;
+                yourself ].
+        entry at: #duration put: (entry at: #duration) + duration.
+        entry at: #credits put: (entry at: #credits) + duration asSeconds.
+        entry at: #lastSeen put: now.
+        LastSeen at: CurrentSelector put: entry.
+				
+				
+	].
 
-    selector := aCompiledMethod selector asString.
-    CurrentSelector := selector.
-    CurrentStart := now.
+	selector := aCompiledMethod selector asString.
+	CurrentSelector := selector.
+	CurrentStart := now
 ]
 
 { #category : 'tracing' }
